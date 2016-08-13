@@ -1,3 +1,5 @@
+# C++
+#
 # Compiled Object files
 *.slo
 *.lo
@@ -27,3 +29,8 @@
 *.exe
 *.out
 *.app
+
+# Python
+# Py cahe files 
+__pycache__/
+.pyc
