@@ -33,4 +33,8 @@
 # Python
 # Py cahe files 
 __pycache__/
-.pyc
+*.pyc
+
+# Misc
+# vim temporary files
+*.swp
