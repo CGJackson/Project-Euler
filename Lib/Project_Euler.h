@@ -19,16 +19,12 @@ namespace project_euler {
 
     std::vector<long long unsigned> primes_to_n(const long long unsigned n);
 
-    int gcd(int n, int m);
+    int isqrt(int n);
 
-    long int gcd(long int n, long int m);
+    long int isqrt(long int n);
 
-    long long int gcd(long long int n,long long int m);
+    long long int isqrt(long long int n);
 
-    unsigned gcd(unsigned n, unsigned m);
-
-    long unsigned gcd(long unsigned n, long unsigned m);
-
-    long long unsigned gcd(long long unsigned n,long long unsigned m);
+    short int isqrt(short int n);
 }
 #endif

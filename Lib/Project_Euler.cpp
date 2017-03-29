@@ -3,8 +3,8 @@
 // Contents:
 //  primes_to_n(n): returns a vector of all the prime numbers less than or 
 //                  equal to n
-//  gcd(m,n): returns the greatest common divisor of m and n
-
+//  isqrt(n): returns the integer square root of n or -1 if n is not a 
+//                  square number.
 #include <vector>
 
 #include "Project_Euler.h"
@@ -48,6 +48,60 @@ namespace project_euler_internal {
 
         return primes;
     }
+
+
+    #define isqrt_return_on_failure -1
+
+    template<typename intType>
+    intType isqrt_template(const intType n){
+        if(n == 0)
+            return 0;
+        if(n == 1)
+            return 1;
+
+        int bits_in_n = 1;
+        intType x = n, t;
+        while(x >>= 1){
+            ++bits_in_n;
+        }
+        x = 1 << (bits_in_n/2);
+        if(x*x == n){
+            return x;
+        }
+
+        intType upper_bound = x, lower_bound = x;
+        if(x*x > n){
+            lower_bound >>= 1;
+            while(lower_bound*lower_bound > n){
+                upper_bound >>=1;
+                lower_bound >>=1;
+            }
+            
+        }
+        else{
+            upper_bound <<= 1;
+            while(upper_bound*upper_bound < n){
+                upper_bound <<= 1;
+                lower_bound <<=1;
+                
+            }
+                
+        }
+        x = (upper_bound+lower_bound) >> 1;
+        while(upper_bound-lower_bound > 1){
+            t = x*x; 
+            if(t == n)
+                return x;
+            else if(t > n){
+                upper_bound = x;
+            }
+            else {
+                lower_bound = x;
+            }
+            x = (upper_bound + lower_bound) >> 1;
+        }
+        return isqrt_return_on_failure;
+    }
 };
 
 vector<int> project_euler::primes_to_n(const int n){
@@ -75,3 +129,18 @@ vector<long long unsigned> project_euler::primes_to_n(
         return project_euler_internal::primes_to_n_template(n);
     }
 
+int project_euler::isqrt(int n){
+    return project_euler_internal::isqrt_template(n);
+}
+
+long int project_euler::isqrt(long int n){
+    return project_euler_internal::isqrt_template(n);
+}
+
+long long int project_euler::isqrt(long long int n){
+    return project_euler_internal::isqrt_template(n);
+}
+
+short int project_euler::isqrt(short int n){
+    return project_euler_internal::isqrt_template(n);
+}

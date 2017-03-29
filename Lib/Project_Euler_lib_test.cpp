@@ -4,12 +4,14 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <random>
 
 #include "Project_Euler.h"
 
 using std::vector;  using std::pair; 
 using std::equal;
 using std::find;    using std::find_if_not;
+using std::default_random_engine;   using std::uniform_int_distribution;
 using std::cout;    using std::endl;
 
 // Runs unit test of function primes to n
@@ -78,11 +80,79 @@ bool test_primes_to_n(){
     return passed_all_tests;
 }
 
+// Runs unit tests of function isqrt
+bool test_isqrt(){
+    using project_euler::isqrt;
+    cout << "Running tests of function isqrt"<<endl;
+    bool all_tests_passed = true;
+
+    int root, target;
+
+    if(isqrt(0) == 0)
+        cout << "isqrt(0) sucessfully returned 0" <<endl;
+    else{
+        cout << "isqrt(0) returned " << isqrt(0) <<endl;
+        all_tests_passed = false;
+    }
+
+    if(isqrt(1) == 1)
+        cout << "isqrt(1) sucessfully returned 1" <<endl;
+    else{
+        cout << "isqrt(1) returned " << isqrt(1) <<endl;
+        all_tests_passed = false;
+    }
+        
+    default_random_engine generator;
+    uniform_int_distribution<int> root_distribution(2,1000);
+
+    bool test_100_random_squares = true;
+    for(int i = 0; i < 100; ++i){
+        root = root_distribution(generator);
+        target = root*root;
+        if( isqrt(target) != root){
+            cout << "isqrt("<< target <<") did not return "<< root 
+                 <<". instead it returned " << isqrt(target) << endl;
+            all_tests_passed = false;
+            test_100_random_squares = false;
+        }
+    }
+    if(test_100_random_squares){
+        cout << "isqrt gave the correct root for 100 random square numbers"
+             << " between 4 and 1000000." << endl;
+    }
+
+    // The smallest gap between squares > 1 is 9-4=5, this generates a
+    // random number smller than that gap
+    uniform_int_distribution<int> offset_distribution(1,4);
+
+    bool test_100_random_non_squares = true;
+    for(int i = 0; i < 100; ++i){
+        root = root_distribution(generator);
+        target = root*root + offset_distribution(generator);
+        if( isqrt(target) != -1){
+            cout << "isqrt("<< target <<") did not return -1" 
+                 <<". instead it returned " << isqrt(target) << endl;
+            all_tests_passed = false;
+            test_100_random_non_squares = false;
+        }
+
+    }
+    if(test_100_random_non_squares){
+        cout << "isqrt gave -1 for 100 random non-square numbers"
+             << " between 5 and 1000004." << endl;
+    }
+
+    cout << endl;
+    return all_tests_passed;
+
+}
+
 int main(){
     bool all_tests_passed = true;
     
     all_tests_passed &= test_primes_to_n();    
 
+    all_tests_passed &= test_isqrt();
 
     if(all_tests_passed){
         cout << "All tests passed" << endl;
