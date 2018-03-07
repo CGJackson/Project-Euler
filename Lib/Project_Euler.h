@@ -4,6 +4,7 @@
 // Contains common function for Project Euler problems
 
 #include <vector>
+#include <cstddef>
 
 namespace project_euler {
 
@@ -19,6 +20,8 @@ namespace project_euler {
 
     std::vector<long long unsigned> primes_to_n(const long long unsigned n);
 
+    std::vector<std::size_t> primes_to_n(cosnt std::size_t);
+
     int isqrt(int n);
 
     long int isqrt(long int n);
@@ -26,5 +29,15 @@ namespace project_euler {
     long long int isqrt(long long int n);
 
     short int isqrt(short int n);
+
+    unsigned isqrt(unsigned n);
+
+    unsigned long isqrt(unsigned long n);
+
+    unsigned long long isqrt(unsigned long long n);
+
+    unsigned short isqrt(unsigned short n);
+
+    std::size_t isqrt(std::size_t n);
 }
 #endif

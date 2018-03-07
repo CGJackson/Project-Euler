@@ -6,10 +6,12 @@
 //  isqrt(n): returns the integer square root of n or -1 if n is not a 
 //                  square number.
 #include <vector>
+#include <cstddef>
 
 #include "Project_Euler.h"
 
 using std::vector;
+using std::size_t;
 
 namespace project_euler_internal {
 
@@ -105,29 +107,33 @@ namespace project_euler_internal {
 };
 
 vector<int> project_euler::primes_to_n(const int n){
-        return project_euler_internal::primes_to_n_template(n);
-    }
+    return project_euler_internal::primes_to_n_template(n);
+}
 
 vector<long int> project_euler::primes_to_n(const long int n){
-        return project_euler_internal::primes_to_n_template(n);
-    }
+    return project_euler_internal::primes_to_n_template(n);
+}
 
 vector<long long int> project_euler::primes_to_n(const long long int n){
-        return project_euler_internal::primes_to_n_template(n);
-    }
+    return project_euler_internal::primes_to_n_template(n);
+}
 
 vector<unsigned> project_euler::primes_to_n(const unsigned n){
-        return project_euler_internal::primes_to_n_template(n);
-    }
+    return project_euler_internal::primes_to_n_template(n);
+}
 
 vector<long unsigned> project_euler::primes_to_n(const long unsigned n){
-        return project_euler_internal::primes_to_n_template(n);
-    }
+    return project_euler_internal::primes_to_n_template(n);
+}
 
 vector<long long unsigned> project_euler::primes_to_n(
                                                 const long long unsigned n){
-        return project_euler_internal::primes_to_n_template(n);
-    }
+    return project_euler_internal::primes_to_n_template(n);
+}
+
+vector<size_t> project_euler_internal::primes_to_n(const size_t n){
+    return project_euler_internal::primes_to_n_template(n);
+}
 
 int project_euler::isqrt(int n){
     return project_euler_internal::isqrt_template(n);
@@ -144,3 +150,25 @@ long long int project_euler::isqrt(long long int n){
 short int project_euler::isqrt(short int n){
     return project_euler_internal::isqrt_template(n);
 }
+
+unsigned project_euler::isqrt(unsigned n){
+    return project_euler_internal::isqrt(n);
+}
+
+unsigned long project_euler::isqrt(unsigned long n){
+    return project_euler_internal::isqrt(n);
+}
+
+unsigned long long project_euler::isqrt(unsigned long long n){
+    return project_euler_internal::isqrt(n);
+}
+
+
+unsigned short project_euler::isqrt(unsigned short n){
+    return project_euler_internal::isqrt(n);
+}
+
+size_t project_euler::isqrt(size_t n){
+    return project_euler_internal::isqrt(n);
+}
+
