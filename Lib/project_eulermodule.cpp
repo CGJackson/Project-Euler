@@ -21,12 +21,13 @@ static PyObject* PyList_FromVector(const std::vector<T> &vec,
             return NULL;
         }
 
-        int failed_to_add = PyList_Append(list, py_e);
-        Py_DECREF(py_e);
-        if(failed_to_add){
-            Py_DECREF(list);
+        if(PyList_Append(list, py_e)){  // PyList_Append returns 0 on success
+            Py_DECREF(list);            // because consitency...
+            Py_DECREF(py_e);
             return NULL;
         }
+
+        Py_DECREF(py_e);
     }
     return list;
 }
