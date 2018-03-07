@@ -6,12 +6,10 @@
 //  isqrt(n): returns the integer square root of n or -1 if n is not a 
 //                  square number.
 #include <vector>
-#include <cstddef>
 
 #include "Project_Euler.h"
 
 using std::vector;
-using std::size_t;
 
 namespace project_euler_internal {
 
@@ -131,10 +129,6 @@ vector<long long unsigned> project_euler::primes_to_n(
     return project_euler_internal::primes_to_n_template(n);
 }
 
-vector<size_t> project_euler_internal::primes_to_n(const size_t n){
-    return project_euler_internal::primes_to_n_template(n);
-}
-
 int project_euler::isqrt(int n){
     return project_euler_internal::isqrt_template(n);
 }
@@ -152,23 +146,18 @@ short int project_euler::isqrt(short int n){
 }
 
 unsigned project_euler::isqrt(unsigned n){
-    return project_euler_internal::isqrt(n);
+    return project_euler_internal::isqrt_template(n);
 }
 
 unsigned long project_euler::isqrt(unsigned long n){
-    return project_euler_internal::isqrt(n);
+    return project_euler_internal::isqrt_template(n);
 }
 
 unsigned long long project_euler::isqrt(unsigned long long n){
-    return project_euler_internal::isqrt(n);
+    return project_euler_internal::isqrt_template(n);
 }
 
 
 unsigned short project_euler::isqrt(unsigned short n){
-    return project_euler_internal::isqrt(n);
+    return project_euler_internal::isqrt_template(n);
 }
-
-size_t project_euler::isqrt(size_t n){
-    return project_euler_internal::isqrt(n);
-}
-

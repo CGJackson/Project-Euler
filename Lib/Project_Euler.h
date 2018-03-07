@@ -20,8 +20,6 @@ namespace project_euler {
 
     std::vector<long long unsigned> primes_to_n(const long long unsigned n);
 
-    std::vector<std::size_t> primes_to_n(cosnt std::size_t);
-
     int isqrt(int n);
 
     long int isqrt(long int n);
@@ -37,7 +35,5 @@ namespace project_euler {
     unsigned long long isqrt(unsigned long long n);
 
     unsigned short isqrt(unsigned short n);
-
-    std::size_t isqrt(std::size_t n);
 }
 #endif
