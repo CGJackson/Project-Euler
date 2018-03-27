@@ -272,12 +272,38 @@ bool test_PythagoreanTripleTree(){
         cout << "2 unicremented hypotenuse iterators created by the same "
              << "node were not equal to each other" << endl;
     }
+
+    // elements returned by hyp_iterator
+    std::vector<PythagoreanTripleTree<int>::child_ptr> expected_iterator_values = {tree.get_child(0),tree.get_child(2), tree.get_child(1)};
+
     ++hyp_iterator;
     if(!(hyp_iterator != hyp_iterator2)){
         all_hypotenuse_iterator_tests_passed &= false;
         cout << "2 different hypotenuse_iterators evaluated false for != "
              << "operator" << endl;
     }
+    hyp_iterator2++;
+    if(hyp_iterator != hyp_iterator2){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "applying the prefix and postfix increment operators did "
+             << "not yeild the same result" << endl;
+    }
+    if(&(*hyp_iterator) != expected_iterator_values[0].get()){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "Incrementing the hypotenuse iterator did not give the "
+             << "did not give the next tree node in order of incrasing "
+             << "hypotenuse length" << endl;
+    }
+    if(&(*(++hyp_iterator)) != expected_iterator_values[1].get()){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "The prefix increment operator did not return the correct "
+                "next value for the hypotenuse  iterator" << endl;
+    } 
+    if(&(*(hyp_iterator++)) != expected_iterator_values[1].get()){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "The postfix increment operator did not return the correct "
+                "current value for the hypotenuse  iterator" << endl;
+    } 
     all_iterator_tests_passed &= all_hypotenuse_iterator_tests_passed;
     
     all_tests_passed &= all_iterator_tests_passed;

@@ -238,11 +238,11 @@ namespace pythagorean_triple_internal {
          public:
              explicit PythagoreanTripleTree_HypotenuseIterator<T>(project_euler::PythagoreanTripleTree<T>& start):
                 PythagoreanTripleTree_IncreasingIterator<T>(start){}
-             PythagoreanTripleTree_HypotenuseIterator operator++(){
+             PythagoreanTripleTree_HypotenuseIterator& operator++(){
                 this->increment();
                 return *this;
              }
-             PythagoreanTripleTree_HypotenuseIterator& operator++(int){
+             PythagoreanTripleTree_HypotenuseIterator operator++(int){
                 PythagoreanTripleTree_HypotenuseIterator temp(*this);
                 this->increment();
                 return temp;
