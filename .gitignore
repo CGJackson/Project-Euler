@@ -42,3 +42,7 @@ __pycache__/
 # Haskell
 *.hi
 
+# Testing executable files
+/Lib/test.exe
+/Lib/test
+
