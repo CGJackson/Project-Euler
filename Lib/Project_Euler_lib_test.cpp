@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <array>
 #include <utility>
 #include <algorithm>
 #include <random>
@@ -9,7 +10,7 @@
 #include "Project_Euler.h"
 
 using std::vector;  using std::pair; 
-using std::equal;
+using std::equal;   using std::array;
 using std::find;    using std::find_if_not;
 using std::default_random_engine;   using std::uniform_int_distribution;
 using std::cout;    using std::endl;
@@ -147,6 +148,215 @@ bool test_isqrt(){
 
 }
 
+bool test_PythagoreanTripleTree(){
+    using project_euler::PythagoreanTripleTree;
+    
+    cout << "Running tests on PythagoreanTripleTree" << endl;    
+
+    bool all_tests_passed = true;
+
+    PythagoreanTripleTree<int> tree;
+    
+    cout << "Testing initialisation of PythagoreanTripleTree" << endl;
+
+    constexpr array<int,3> expected_first_triple = {3,4,5};
+    if( tree.get_first_side() != expected_first_triple[0] ){
+        all_tests_passed &= false;
+        cout << "For base tree first side not initalised correctly\n";
+        cout << "First side: " << tree.get_first_side() << "\tExpected first side: " << expected_first_triple[0] << endl;
+    }
+    if( tree.get_second_side() != expected_first_triple[1]){
+        all_tests_passed &= false;
+        cout << "For base tree second side not initalised correctly\n";
+        cout << "Second side: " << tree.get_second_side() << "\tExpected second side: " << expected_first_triple[1] << endl;
+    }
+    if( tree.get_hypotenuse() != 5){
+        all_tests_passed &= false;
+        cout << "for base tree hypotinuse not initalised correctly\n";
+        cout << "hypotinuse: " << tree.get_hypotenuse() << "\tExpected hypotinuse: " << expected_first_triple[2] << endl;
+    }
+    if( tree.get_parent() != nullptr){
+        all_tests_passed &= false;
+        cout << "for base tree parent not initalised to nullptr" << endl;
+    }
+
+    if(all_tests_passed){
+        cout << "Base PythagoreanTripleTree initalised correctly" << endl;
+    }
+
+    bool all_child_tests_passed = true;
+    cout << "Testing Children created correctly" << endl;
+    array<array<int,3>,3> expected_child_triples = {{ {5,12,13},{21,20,29},{15,8,17} }};
+    for(unsigned i = 0; i < 3; ++i){
+        auto child = tree.get_child(i);
+        if(child->get_parent() != &tree){
+            all_child_tests_passed &= false;
+            cout << "Child " << i << "'s parent pointer did not point to its parent.";
+            if(child->get_parent() == nullptr){
+                cout << " Pointer was instead null.";
+            }
+            else{
+                cout << " Pointer was not null.";
+            }
+            cout << endl;
+        }
+        if(child->get_first_side() != expected_child_triples[i][0]){
+            all_child_tests_passed &= false;
+            cout << "Child "  << i << " did not have the correct first side\n"
+                 << "First side: " << child->get_first_side() << "\tExpected first side: " << expected_child_triples[i][0] << endl;
+        }
+        if(child->get_second_side() != expected_child_triples[i][1]){
+            all_child_tests_passed &= false;
+            cout << "Child "  << i << " did not have the correct second side\n"
+                 << "Second side: " << child->get_second_side() << "\tExpected second side: " << expected_child_triples[i][1] << endl;
+        }
+        if(child->get_hypotenuse() != expected_child_triples[i][2]){
+            all_child_tests_passed &= false;
+            cout << "Child "  << i << " did not have the correct hypotinuse\n"
+                 << "Hypotinuse: " << child->get_hypotenuse() << "\tExpected hypotinuse: " << expected_child_triples[i][2] << endl;
+        }
+    }
+    all_tests_passed &= all_child_tests_passed;
+    if(all_child_tests_passed){
+        cout << "All children created correctly" << endl;
+    }
+
+    cout << "Testing construction of arbitrary triple" << endl;
+    bool all_constructed_tripe_tests_passed = true;
+    constexpr array<int,3> constructed_triple = {6,8,10};
+    PythagoreanTripleTree<int> tree2(constructed_triple[0], constructed_triple[1]);
+    if( tree2.get_first_side() != constructed_triple[0] ){
+        all_constructed_tripe_tests_passed  &= false;
+        cout << "For constructed tree first side not initalised correctly\n";
+        cout << "First side: " << tree2.get_first_side() << "\tExpected first side: " << constructed_triple[0] << endl;
+    }
+    if( tree2.get_second_side() != constructed_triple[1]){
+        all_constructed_tripe_tests_passed &= false;
+        cout << "For constructed tree second side not initalised correctly\n";
+        cout << "Second side: " << tree2.get_second_side() << "\tExpected second side: " << constructed_triple[1] << endl;
+    }
+    if( tree2.get_hypotenuse() != constructed_triple[2]){
+        all_constructed_tripe_tests_passed &= false;
+        cout << "for constructed tree hypotinuse not initalised correctly\n";
+        cout << "hypotinuse: " << tree2.get_hypotenuse() << "\tExpected hypotinuse: " << constructed_triple[2] << endl;
+    }
+    if( tree2.get_parent() != nullptr){
+        all_constructed_tripe_tests_passed &= false;
+        cout << "for constructed tree parent not initalised to nullptr" << endl;
+    }
+
+    if(all_constructed_tripe_tests_passed){
+        cout << "Constructed PythagoreanTripleTree initalised correctly" << endl;
+    }
+
+    cout << "Testing tree iterators" << endl;
+    bool all_iterator_tests_passed = true;
+
+    cout << "Testing hypotenuse iterator" << endl;
+    bool all_hypotenuse_iterator_tests_passed = true;
+    PythagoreanTripleTree<int>::hypotenuse_iterator hyp_iterator = tree.begin_hypotenuse_iterator();
+    if(&(*hyp_iterator) != &tree){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "dereferencing the hypotenuse iterator before incrementing "
+             << "did not return the node that created it." << endl;
+    }
+    if(hyp_iterator->get_first_side() != tree.get_first_side()){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "Calling methods via the -> operator on a hypotenuse "
+             << "iterator did not give the same result as calling the "
+             << "method directly" << endl;
+    }
+    PythagoreanTripleTree<int>::hypotenuse_iterator hyp_iterator2 = tree.begin_hypotenuse_iterator();
+    if(!( hyp_iterator == hyp_iterator2 )){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "2 unicremented hypotenuse iterators created by the same "
+             << "node were not equal to each other" << endl;
+    }
+    ++hyp_iterator;
+    if(!(hyp_iterator != hyp_iterator2)){
+        all_hypotenuse_iterator_tests_passed &= false;
+        cout << "2 different hypotenuse_iterators evaluated false for != "
+             << "operator" << endl;
+    }
+    all_iterator_tests_passed &= all_hypotenuse_iterator_tests_passed;
+    
+    all_tests_passed &= all_iterator_tests_passed;
+
+    cout << "Testing move constructor" << endl;
+    bool all_move_tests_passed = true;
+    constexpr unsigned TEST_CHILD = 0, TEST_PARENT_CHILD = 0;
+    PythagoreanTripleTree<int>::child_ptr middle_node = tree.get_child(TEST_PARENT_CHILD);
+    PythagoreanTripleTree<int>::child_ptr lower_node = middle_node->get_child(TEST_CHILD); //forces middle_node to generate a child
+
+    array<int,3> expected_moved_triple {middle_node->get_first_side(),
+                                        middle_node->get_second_side(),
+                                        middle_node->get_hypotenuse()};
+
+    PythagoreanTripleTree<int> new_middle_node(std::move(*middle_node));
+
+    if(new_middle_node.get_first_side() != expected_moved_triple[0] ||
+       new_middle_node.get_second_side() != expected_moved_triple[1] ||
+       new_middle_node.get_hypotenuse() != expected_moved_triple[2]){
+        all_move_tests_passed &= false;
+        cout << "Moved node did not contain the same triple as the original\n"
+             <<"Original triple: " << expected_moved_triple[0] << ", "
+                                   << expected_moved_triple[1] << ", "
+                                   << expected_moved_triple[2] << "\t"
+            << "Moved triple: "    << new_middle_node.get_first_side() << ", "
+                                   << new_middle_node.get_second_side() << ", "
+                                   << new_middle_node.get_hypotenuse() << endl;
+    }
+
+    if(new_middle_node.get_parent() != &tree){
+        all_move_tests_passed &= false;
+        cout << "Moved node's parent pointer did not point to the old parent\n"
+             << "Moved node's parent pointer was " 
+             << (new_middle_node.get_parent() == nullptr ? "null" : "not null")
+             << endl;
+    }
+    if(new_middle_node.get_child(TEST_CHILD) != lower_node){
+        all_move_tests_passed &= false;
+        cout << "Moved node's child pointer does not point to the existing child"
+             << " of the original node\n";
+    }
+    if(lower_node->get_parent() != &new_middle_node){
+        all_move_tests_passed &= false;
+        cout << "Child node's parent pointer does not point to the moved node\n";
+        if(lower_node->get_parent() == nullptr){
+            cout << "Child node's parent pointer is null";
+        }
+        else if(lower_node->get_parent() == middle_node.get()){
+            cout << "Child node's parent pointer points to the original parent" ;
+
+        }
+        else{
+            cout << "Child node;s parent pointer does not point to the original parent"
+                 << "and is not null";
+        }
+        cout << endl;
+    }
+    //if(tree.get_child(TEST_PARENT_CHILD).get() != &new_middle_node){
+    //    all_move_tests_passed &= false;
+    //    cout << "Parent's child pointer did not point to the new node\n";
+    //    if(tree.get_child(TEST_PARENT_CHILD) == nullptr){
+    //        cout << "Parent's child pointer was null";
+    //    }
+    //    else if(tree.get_child(TEST_PARENT_CHILD) == middle_node){
+    //        cout << "Parent's child pointer points to the origninal node";
+    //    }
+    //    else{
+    //        cout << "Parent's child pointer is not null "
+    //             << "and does not point to the original child";
+    //    }
+    //    cout << endl;
+    //}
+    all_tests_passed &= all_move_tests_passed;
+
+    
+
+    return all_tests_passed;
+}
+
 int main(){
     bool all_tests_passed = true;
     
@@ -154,10 +364,12 @@ int main(){
 
     all_tests_passed &= test_isqrt();
 
+    all_tests_passed &= test_PythagoreanTripleTree();
+
     if(all_tests_passed){
-        cout << "All tests passed" << endl;
+        cout << "\nAll tests passed" << endl;
     }else{
-        cout << "Some tests were failed" << endl;
+        cout << "\nSome tests were failed" << endl;
     }
 return 0;
 }

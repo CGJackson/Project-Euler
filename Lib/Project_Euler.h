@@ -4,7 +4,7 @@
 // Contains common function for Project Euler problems
 
 #include <vector>
-#include <cstddef>
+
 
 namespace project_euler {
 
@@ -35,5 +35,9 @@ namespace project_euler {
     unsigned long long isqrt(unsigned long long n);
 
     unsigned short isqrt(unsigned short n);
+
 }
+
+#include "Pythagorean_Triples.h"
+
 #endif
