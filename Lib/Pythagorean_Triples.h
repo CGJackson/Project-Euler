@@ -109,7 +109,7 @@ namespace project_euler{
                 return hypotenuse_iterator(*this);
            }
 
-           perimeter_iterator begin_perimitor_iterator(){
+           perimeter_iterator begin_perimeter_iterator(){
                 return perimeter_iterator(*this);
            }
 

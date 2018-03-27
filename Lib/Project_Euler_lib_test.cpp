@@ -306,6 +306,59 @@ bool test_PythagoreanTripleTree(){
     } 
     all_iterator_tests_passed &= all_hypotenuse_iterator_tests_passed;
     
+    cout << "Testing perimeter iterator" << endl;
+    bool all_perimeter_iterator_tests_passed = true;
+    PythagoreanTripleTree<int>::perimeter_iterator perim_iterator = tree.begin_perimeter_iterator();
+    if(&(*perim_iterator) != &tree){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "dereferencing the perimeter iterator before incrementing "
+             << "did not return the node that created it." << endl;
+    }
+    if(perim_iterator->get_first_side() != tree.get_first_side()){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "Calling methods via the -> operator on a perimeter "
+             << "iterator did not give the same result as calling the "
+             << "method directly" << endl;
+    }
+    PythagoreanTripleTree<int>::perimeter_iterator perim_iterator2 = tree.begin_perimeter_iterator();
+    if(!( perim_iterator == perim_iterator2 )){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "2 unicremented perimeter iterators created by the same "
+             << "node were not equal to each other" << endl;
+    }
+
+    // elements returned by perim_iterator
+    std::vector<PythagoreanTripleTree<int>::child_ptr> expected_p_iterator_values = {tree.get_child(0),tree.get_child(2), tree.get_child(1)};
+
+    ++perim_iterator;
+    if(!(perim_iterator != perim_iterator2)){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "2 different perimeter_iterators evaluated false for != "
+             << "operator" << endl;
+    }
+    perim_iterator2++;
+    if(perim_iterator != perim_iterator2){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "applying the prefix and postfix increment operators did "
+             << "not yeild the same result" << endl;
+    }
+    if(&(*perim_iterator) != expected_p_iterator_values[0].get()){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "Incrementing the perimeter iterator did not give the "
+             << "did not give the next tree node in order of incrasing "
+             << "perimeter length" << endl;
+    }
+    if(&(*(++perim_iterator)) != expected_p_iterator_values[1].get()){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "The prefix increment operator did not return the correct "
+                "next value for the perimeter  iterator" << endl;
+    } 
+    if(&(*(perim_iterator++)) != expected_p_iterator_values[1].get()){
+        all_perimeter_iterator_tests_passed &= false;
+        cout << "The postfix increment operator did not return the correct "
+                "current value for the perimeter  iterator" << endl;
+    } 
+    all_iterator_tests_passed &= all_perimeter_iterator_tests_passed;
     all_tests_passed &= all_iterator_tests_passed;
 
     cout << "Testing move constructor" << endl;
