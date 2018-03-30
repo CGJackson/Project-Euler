@@ -252,7 +252,7 @@ bool test_PythagoreanTripleTree(){
     cout << "Testing tree iterators" << endl;
     bool all_iterator_tests_passed = true;
 
-    cout << "Testing hypotenuse iterator" << endl;
+    cout << "\tTesting hypotenuse iterator" << endl;
     bool all_hypotenuse_iterator_tests_passed = true;
     PythagoreanTripleTree<int>::hypotenuse_iterator hyp_iterator = tree.begin_hypotenuse_iterator();
     if(&(*hyp_iterator) != &tree){
@@ -306,7 +306,7 @@ bool test_PythagoreanTripleTree(){
     } 
     all_iterator_tests_passed &= all_hypotenuse_iterator_tests_passed;
     
-    cout << "Testing perimeter iterator" << endl;
+    cout << "\tTesting perimeter iterator" << endl;
     bool all_perimeter_iterator_tests_passed = true;
     PythagoreanTripleTree<int>::perimeter_iterator perim_iterator = tree.begin_perimeter_iterator();
     if(&(*perim_iterator) != &tree){

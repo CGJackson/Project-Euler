@@ -257,6 +257,8 @@ namespace pythagorean_triple_internal {
     template<typename T>
     class PythagoreanTripleTree_PerimeterIterator: public PythagoreanTripleTree_IncreasingIterator<T>{
         public:
+             explicit PythagoreanTripleTree_PerimeterIterator<T>(project_euler::PythagoreanTripleTree<T>& start)
+                 :PythagoreanTripleTree_IncreasingIterator<T>(start){}
              PythagoreanTripleTree_PerimeterIterator& operator++(){
                 this->increment();
                 return *this;
