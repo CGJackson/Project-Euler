@@ -6,10 +6,13 @@
 #include <utility>
 #include <algorithm>
 #include <random>
+#include <numeric>
+#include <limits>
 
 #include "Project_Euler.h"
 
 using std::vector;  using std::pair; 
+using std::tuple;
 using std::equal;   using std::array;
 using std::find;    using std::find_if_not;
 using std::default_random_engine;   using std::uniform_int_distribution;
@@ -41,6 +44,16 @@ bool test_primes_to_n(){
         for(auto p:calculated_primes)
             cout << p << " ";
         cout << endl;
+    }
+
+    auto primes_to_1million = primes_to_n(1000000);
+    if( primes_to_1million.size() == 78498 && primes_to_1million.back() < 1000000){
+        cout << "primes_to_n(1000000) suceesfully found 78498 numbers less than 1000000" << endl;
+    }
+    else{
+        cout << "primes_to_n(1000000) did not successfully find all prime numbers bellow 1000000\n" 
+             << "It found " << primes_to_1million.size() << " \"prime numbers\". The largest was " << primes_to_1million.back() << endl;
+        passed_all_tests &= false;
     }
 
     calculated_primes = primes_to_n(0);
@@ -80,6 +93,67 @@ bool test_primes_to_n(){
     cout << endl;
     return passed_all_tests;
 }
+
+bool test_prime_counting_function(){
+    using project_euler::prime_counting_function;
+    bool all_tests_passed = true;
+    cout << "Running tests of prime_counting_function" << endl;
+    // Tests for composite integer
+    if(prime_counting_function((long long) 50) == 15){
+        cout << "prime_counting_function(50) successfully returned 15" <<endl;
+    }
+    else {
+        all_tests_passed &= false;
+        cout << "prime_counting_function(50) returned " << prime_counting_function(50) << " rather than 15"<< endl;
+    }
+    if(prime_counting_function((long long) 1000000) == 78498){
+        cout << "prime_counting_function(1000000) successfully returned 78498" <<endl;
+    }
+    else {
+        all_tests_passed &= false;
+        cout << "prime_counting_function(1000000) returned " << prime_counting_function(1000000) << " rather than 78498"<< endl;
+    }
+    // Tests for prime integer
+    if(prime_counting_function(1000003) == 6){
+        cout << "prime_counting_function(1000003) successfully returned 78499" <<endl;
+    }
+    else {
+        all_tests_passed &= false;
+        cout << "prime_counting_function(1000003) returned " << prime_counting_function(1000003) << " rather than 78499" << endl;
+    }
+    // Test for 1
+    if(prime_counting_function(1) == 0){
+        cout << "prime_counting_function(1) successfully returned 0" <<endl;
+    }
+    else {
+        all_tests_passed &= false;
+        cout << "prime_counting_function(1) returned " << prime_counting_function(1) << endl;
+    }
+    // Test for 0
+    if(prime_counting_function(0) == 0){
+        cout << "prime_counting_function(0) successfully returned 0" <<endl;
+    }
+    else {
+        all_tests_passed &= false;
+        cout << "prime_counting_function(0) returned " << prime_counting_function(0) << endl;
+    }
+    // Test for negative number
+    if(prime_counting_function(-5) == 0){
+        cout << "prime_counting_function(-5) successfully returned 0" <<endl;
+    }
+    else {
+        all_tests_passed &= false;
+        cout << "prime_counting_function(-5) returned " << prime_counting_function(-5) << endl;
+    }
+    cout << endl;
+    return all_tests_passed;
+}
+
+//bool test_prime_factors(){
+//    using project_euler::prime_factors;
+//
+//
+//}
 
 // Runs unit tests of function isqrt
 bool test_isqrt(){
@@ -431,7 +505,174 @@ bool test_PythagoreanTripleTree(){
     //}
     all_tests_passed &= all_move_tests_passed;
 
+    cout << endl;
+
+    return all_tests_passed;
+}
+
+bool extended_gcd_test_case(int a, int b){
+    cout << "testing extended_gcd with " << a << " and " << b << endl;
+    tuple<int,int,int> results = project_euler::extended_gcd(a,b);
+    int gcd = std::get<0>(results);
+    int a_coef = std::get<1>(results);
+    int b_coef = std::get<2>(results);
+
+    bool all_tests_passed = true;
+
+    if (gcd <= 0){
+        cout << "\tgcd, " << gcd << ", of " << a << " and " << b << " not positive\n";
+        all_tests_passed &= false;
+    }
+
+    if ( a % gcd != 0 ){
+        cout << "\tgcd of " << a << " and " << b << ", " << gcd << ", did not divide " << a << "\n";
+        all_tests_passed &= false;
+    }
+
+    // cheak that the gcd found really is the greatest common divisor of a and b
+    if ( b % gcd != 0 ){
+        cout << "\tgcd of " << a << " and " << b << ", " << gcd << ", did not divide " << b << "\n";
+        all_tests_passed &= false;
+    }
+    if( gcd == std::numeric_limits<int>::max() ){
+        cout << "\tcannot test for divisors greater than gcd == INT_MAX\n";
+    } else {
+        for(auto i = gcd+1; i <= std::min(std::abs(a),std::abs(b));++i){
+            if ( (a % i == 0) && (b % i == 0) ){
+                cout << "\t" << i << " is a larger common divisors of " << a << " and " << b << " than the gcd, " << gcd << "\n";
+                all_tests_passed &= false;
+                break;
+            } 
+        }
+    }
+
+    // cheak Bezout's identity
+    if ( a*a_coef + b*b_coef != gcd){
+        cout << "\tthe coefficents " << a_coef << " and " << b_coef << " did not satisfy Bezout's identity for " << a << " and " << b << " with greatest common divisor " << gcd << "\n";
+        all_tests_passed &= false;
+    }
+
+    if (all_tests_passed){
+        cout << "\tall tests passed\n";
+    }
+
+    cout << std::flush;
+
+    return all_tests_passed;
+}
+
+bool test_extended_gcd(){
+    bool all_tests_passed = true;
     
+    cout << "Testing extended_gcd" << endl;
+
+    cout << "Testing standard behaviour" << endl;
+    all_tests_passed &= extended_gcd_test_case(10,15);
+
+    all_tests_passed &= extended_gcd_test_case(20,9);
+
+    all_tests_passed &= extended_gcd_test_case(29,14);
+
+    all_tests_passed &= extended_gcd_test_case(15,45);
+
+    all_tests_passed &= extended_gcd_test_case(3,9);
+
+    all_tests_passed &= extended_gcd_test_case(8,8);
+
+    all_tests_passed &= extended_gcd_test_case(5,5);
+
+    all_tests_passed &= extended_gcd_test_case(1904,5838);
+
+    all_tests_passed &= extended_gcd_test_case(997,2934);
+
+    all_tests_passed &= extended_gcd_test_case(997,1994);
+
+    all_tests_passed &= extended_gcd_test_case(1465,1465);
+
+    cout << "Testing behaviour close to INT_MAX" << endl;
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::max(),14);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::max(),15);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::max(),2);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::max(),std::numeric_limits<int>::max()-2);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::max(),std::numeric_limits<int>::max()-1);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::max(),std::numeric_limits<int>::max());
+
+    cout << "Testing negative inputs" << endl;
+    all_tests_passed &= extended_gcd_test_case(-1,5);
+
+    all_tests_passed &= extended_gcd_test_case(-10,5);
+
+    all_tests_passed &= extended_gcd_test_case(-10,-5);
+
+    all_tests_passed &= extended_gcd_test_case(10,-5);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::min(), 14);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::min(), -15);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()+1);
+
+    all_tests_passed &= extended_gcd_test_case(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+
+    cout << "Testing 0 inputs" << endl;
+
+    tuple<int,int,int> results = project_euler::extended_gcd(0,29);
+    if(results != std::make_tuple(29,0,1)){
+        cout << "Calculating the extended gcd of 0 and 29 returned (" << std::get<0>(results) <<"," << std::get<1>(results) << "," << std::get<2>(results) << "instead of (29,0,1)" << endl;
+        all_tests_passed &= false;
+    }
+
+    results = project_euler::extended_gcd(254,0);
+    if(results != std::make_tuple(254,1,0)){
+        cout << "Calculating the extended gcd of 254 and 0 returned (" << std::get<0>(results) <<"," << std::get<1>(results) << "," << std::get<2>(results) << ") instead of (254,1,0)" << endl;
+        all_tests_passed &= false;
+    }
+
+    results = project_euler::extended_gcd(0,0);
+    if(results != std::make_tuple(0,0,0)){
+        cout << "Calculating the extended gcd of 0 and 0 returned (" << std::get<0>(results) <<"," << std::get<1>(results) << "," << std::get<2>(results) << "instead of (0,0,0)" << endl;
+        all_tests_passed &= false;
+    }
+
+    cout << "Testing cases which lead to integer overflow" << endl;
+    bool error_raised_correctly = false;
+    constexpr int int_min = std::numeric_limits<int>::min();
+    try{
+        project_euler::extended_gcd(int_min, 0);
+    } catch (std::overflow_error& oe) {
+        error_raised_correctly = true;
+    }
+    cout << "extended_gcd(INT_MIN,0) "<< (error_raised_correctly ? "did" : "did not") << " correctly throw a std::overflow_error" << endl;
+    all_tests_passed &= error_raised_correctly;
+    
+    error_raised_correctly = false;
+    try{
+        project_euler::extended_gcd(0, int_min);
+    } catch (std::overflow_error& oe ){
+        error_raised_correctly = true;
+    }
+    cout << "extended_gcd(0,INT_MIN) "<< (error_raised_correctly ? "did" : "did not") << " correctly throw a std::overflow_error" << endl;
+    all_tests_passed &= error_raised_correctly;
+    
+    error_raised_correctly = false;
+    try{
+        project_euler::extended_gcd(int_min, int_min);
+    } catch (std::overflow_error& oe) {
+        error_raised_correctly = true;
+    }
+    cout << "extended_gcd(INT_MIN,INT_MIN) "<< (error_raised_correctly ? "did" : "did not") << " correctly throw a std::overflow_error" << endl;
+    all_tests_passed &= error_raised_correctly;
+
+    if(all_tests_passed){
+        cout << "All tests on extended_gcd passed\n";
+    }
+
+    cout << endl;
 
     return all_tests_passed;
 }
@@ -441,9 +682,13 @@ int main(){
     
     all_tests_passed &= test_primes_to_n();    
 
+    //all_tests_passed &= test_prime_counting_function();
+
     all_tests_passed &= test_isqrt();
 
     all_tests_passed &= test_PythagoreanTripleTree();
+
+    all_tests_passed &= test_extended_gcd();
 
     if(all_tests_passed){
         cout << "\nAll tests passed" << endl;
