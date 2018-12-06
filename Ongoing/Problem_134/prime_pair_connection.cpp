@@ -39,9 +39,9 @@ inline Int_t get_digits(Int_t n){
 }
 
 // returns 10^d(n), that is 10 to the power of the number of digits in n.
-// Multiplying an intger by this factor and adding n will give a number whos 
-// last digits are given by n.
-inline Int_t shift_factor(Int_t n){
+// Multiplying an intger by this factor and adding n will give a number 
+// whos last digits are given by n.
+Int_t shift_factor(Int_t n){
     return ipow((Int_t) 10,get_digits(n));
 }
 
@@ -51,7 +51,11 @@ Int_t find_inverse(Int_t x, Int_t p){
     if( std::get<0>(result) != 1){
         throw std::domain_error("Non-coprime integers do not have modulo inverses");
     }
-    return std::get<1>(result);
+    auto inverse = (std::get<1>(result) % p);
+    if (inverse < 0){
+        inverse = p + inverse;
+    }
+    return inverse;
 }
 
 //Finds the leading digits 
