@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <utility>
+#include <optional>
 
 
 namespace project_euler {
@@ -88,21 +89,21 @@ namespace project_euler {
 
     unsigned long long ipow(unsigned long long base, unsigned long long exp);
 
-    int isqrt(int n);
+    std::optional<int> isqrt(int n);
 
-    long int isqrt(long int n);
+    std::optional<long int> isqrt(long int n);
 
-    long long int isqrt(long long int n);
+    std::optional<long long int> isqrt(long long int n);
 
-    short int isqrt(short int n);
+    std::optional<short int> isqrt(short int n);
 
-    unsigned isqrt(unsigned n);
+    std::optional<unsigned> isqrt(unsigned n);
 
-    unsigned long isqrt(unsigned long n);
+    std::optional<unsigned long> isqrt(unsigned long n);
 
-    unsigned long long isqrt(unsigned long long n);
+    std::optional<unsigned long long> isqrt(unsigned long long n);
 
-    unsigned short isqrt(unsigned short n);
+    std::optional<unsigned short> isqrt(unsigned short n);
 
     std::tuple<int,int,int> extended_gcd(int a, int b);
 

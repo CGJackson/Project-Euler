@@ -8,6 +8,7 @@
 #include <random>
 #include <numeric>
 #include <limits>
+#include <string>
 
 #include "Project_Euler.h"
 
@@ -163,17 +164,17 @@ bool test_isqrt(){
 
     int root, target;
 
-    if(isqrt(0) == 0)
+    if(isqrt(0) == std::optional<int>(0))
         cout << "isqrt(0) sucessfully returned 0" <<endl;
     else{
-        cout << "isqrt(0) returned " << isqrt(0) <<endl;
+        cout << "isqrt(0) returned " << (isqrt(0).has_value()? std::to_string(isqrt(0).value()):std::string("empty")) <<endl;
         all_tests_passed = false;
     }
 
-    if(isqrt(1) == 1)
+    if(isqrt(1) == std::optional<int>(1))
         cout << "isqrt(1) sucessfully returned 1" <<endl;
     else{
-        cout << "isqrt(1) returned " << isqrt(1) <<endl;
+        cout << "isqrt(1) returned " << (isqrt(1).has_value()?std::to_string(isqrt(1).value()):std::string("empty")) <<endl;
         all_tests_passed = false;
     }
         
@@ -184,9 +185,9 @@ bool test_isqrt(){
     for(int i = 0; i < 100; ++i){
         root = root_distribution(generator);
         target = root*root;
-        if( isqrt(target) != root){
+        if( isqrt(target) != std::optional<int>(root)){
             cout << "isqrt("<< target <<") did not return "<< root 
-                 <<". instead it returned " << isqrt(target) << endl;
+                 <<". instead it returned " << (isqrt(target).has_value()? std::to_string(isqrt(target).value()):std::string("empty")) << endl;
             all_tests_passed = false;
             test_100_random_squares = false;
         }
@@ -204,16 +205,16 @@ bool test_isqrt(){
     for(int i = 0; i < 100; ++i){
         root = root_distribution(generator);
         target = root*root + offset_distribution(generator);
-        if( isqrt(target) != -1){
-            cout << "isqrt("<< target <<") did not return -1" 
-                 <<". instead it returned " << isqrt(target) << endl;
+        if( isqrt(target).has_value() ){
+            cout << "isqrt("<< target <<") did not return empty" 
+                 <<". instead it returned " << isqrt(target).value() << endl;
             all_tests_passed = false;
             test_100_random_non_squares = false;
         }
 
     }
     if(test_100_random_non_squares){
-        cout << "isqrt gave -1 for 100 random non-square numbers"
+        cout << "isqrt did return empty for 100 random non-square numbers"
              << " between 5 and 1000004." << endl;
     }
 

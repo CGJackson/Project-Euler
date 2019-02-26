@@ -214,11 +214,11 @@ namespace project_euler_internal {
     #define isqrt_return_on_failure -1
 
     template<typename intType>
-    intType isqrt_template(const intType n){
+    std::optional<intType> isqrt_template(const intType n){
         if(n == 0)
-            return 0;
+            return std::optional(0);
         if(n == 1)
-            return 1;
+            return std::optional(1);
 
         int bits_in_n = 1;
         intType x = n, t;
@@ -227,7 +227,7 @@ namespace project_euler_internal {
         }
         x = 1 << (bits_in_n/2);
         if(x*x == n){
-            return x;
+            return std::optional(x);
         }
 
         intType upper_bound = x, lower_bound = x;
@@ -252,7 +252,7 @@ namespace project_euler_internal {
         while(upper_bound-lower_bound > 1){
             t = x*x; 
             if(t == n)
-                return x;
+                return std::optional(x);
             else if(t > n){
                 upper_bound = x;
             }
@@ -261,7 +261,7 @@ namespace project_euler_internal {
             }
             x = (upper_bound + lower_bound) >> 1;
         }
-        return isqrt_return_on_failure;
+        return std::optional<intType>();
     }
 
     template<typename intType>
@@ -473,35 +473,35 @@ unsigned long long project_euler::ipow(unsigned long long base, unsigned long lo
     return project_euler_internal::ipow_template(base,exp);
 }
 
-int project_euler::isqrt(int n){
+std::optional<int> project_euler::isqrt(int n){
     return project_euler_internal::isqrt_template(n);
 }
 
-long int project_euler::isqrt(long int n){
+std::optional<long int> project_euler::isqrt(long int n){
     return project_euler_internal::isqrt_template(n);
 }
 
-long long int project_euler::isqrt(long long int n){
+std::optional<long long int> project_euler::isqrt(long long int n){
     return project_euler_internal::isqrt_template(n);
 }
 
-short int project_euler::isqrt(short int n){
+std::optional<short int> project_euler::isqrt(short int n){
     return project_euler_internal::isqrt_template(n);
 }
 
-unsigned project_euler::isqrt(unsigned n){
+std::optional<unsigned> project_euler::isqrt(unsigned n){
     return project_euler_internal::isqrt_template(n);
 }
 
-unsigned long project_euler::isqrt(unsigned long n){
+std::optional<unsigned long> project_euler::isqrt(unsigned long n){
     return project_euler_internal::isqrt_template(n);
 }
 
-unsigned long long project_euler::isqrt(unsigned long long n){
+std::optional<unsigned long long> project_euler::isqrt(unsigned long long n){
     return project_euler_internal::isqrt_template(n);
 }
 
-unsigned short project_euler::isqrt(unsigned short n){
+std::optional<unsigned short> project_euler::isqrt(unsigned short n){
     return project_euler_internal::isqrt_template(n);
 }
 

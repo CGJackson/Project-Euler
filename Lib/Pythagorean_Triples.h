@@ -40,7 +40,7 @@ namespace project_euler{
             
             PythagoreanTripleTree<T>(T a, T b):
                     parent(nullptr),
-                    triple{a,b,isqrt(a*a+b*b)},
+                    triple{a,b,isqrt(a*a+b*b).value_or(-1)},
                     children{}{
 
                 if( triple[HYPOTENUSE] == -1 ){
