@@ -19,34 +19,24 @@
 //
 
 #include <vector>
+#include <algorithm>
+#include <iostream>
 
 #include "Project_Euler.h"
 
-#define MAX_PRIME 2001000
-
 using std::vector;
 
-const vector<long int> PRIMES = project_euler::primes_to_n(MAX_PRIME);
+constexpr long int MAX_PRIME = 2001000;
 
+const vector<long> PRIMES = project_euler::primes_to_n(MAX_PRIME);
+
+// checks if a number less than MAX_PRIME is prime
 bool is_prime(long int target){
-    PRIMES::const_iterator   upper_index = PRIMES.end(),
-                         lower_index = PRIMES.begin();
-    if(target == *lower_index)
-        return true;
-    while( target < *upper_index && target > *lower_index]){
-        PRIMES::const_iterator dumby_index = (upper_index-lower_index)/2;
-        if(target == *dumby_index){
-            return true;
-        }
-        if(target > *dumby_index){
-            lower_index = dumby_index;
-        } else {
-            upper_index = dumby_index;
-        }
-    }
-    return false;
+    return std::binary_search(PRIMES.begin(), PRIMES.end(), target);
 }
 
+// Checks the number of primes generated be the quadratic n^2+an+b by 
+// plugging in sucsessive values of n, starting from 0. 
 int number_primes_generated(int a, int b){
     int seq_len = 0;
 
@@ -58,11 +48,15 @@ int number_primes_generated(int a, int b){
 
 int main(){
     
-    int a_max,b_max, longest_sequence_length = 0;
+    int a_max = -2000; // These values are chosen to be outside the allowed 
+    int b_max = -2000; // range, so it is obvious if they are not overriden
+    int longest_sequence_length = 0;
 
-    for(int b:PRIMES){
-        for(int a = -1000+(b%2); a <= 1000; a += 2){
-            int seq_length = number_primes_generated(a,b)
+    const auto B_IT_MAX = std::upper_bound(PRIMES.begin(),PRIMES.end(),1000);
+    for(auto b_it = PRIMES.begin(); b_it != B_IT_MAX ;++b_it){
+        int b = *b_it;
+        for(int a = -1000-(b%2); a <= 1000; a += 2){
+            int seq_length = number_primes_generated(a,b);
             if(seq_length > longest_sequence_length){
                 longest_sequence_length = seq_length;
                 a_max = a;
@@ -71,4 +65,6 @@ int main(){
         }
         
     }
+
+    std::cout << "a = " << a_max << "\nb = " << b_max << "\nlongest sequence length = " << longest_sequence_length << "\nab = " << (a_max*b_max) << std::endl;
 }
