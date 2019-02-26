@@ -22,7 +22,8 @@ namespace project_euler {
                                                                               53,59,61,67,71,
                                                                               73,79,83,89,97};
                                 }
-
+    // Returns a vecotr of the prime numbers up to n
+    
     std::vector<int> primes_to_n(const int n);
 
     std::vector<long int> primes_to_n(const long int n);
