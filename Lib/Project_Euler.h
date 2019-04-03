@@ -4,6 +4,7 @@
 // Contains common function for Project Euler problems
 
 #include <vector>
+#include <set>
 #include <utility>
 #include <optional>
 
@@ -16,13 +17,28 @@ namespace project_euler {
     }
 
     template<typename IntType>
-    inline std::vector<IntType> primes_to_100(){ return std::vector<IntType> {2,3,5,7,11,
+    inline std::set<IntType> primes_to_100(){ return std::set<IntType> {2,3,5,7,11,
                                                                               13,17,19,23,29,
                                                                               31,37,41,43,47,
                                                                               53,59,61,67,71,
                                                                               73,79,83,89,97};
                                 }
-    // Returns a vecotr of the prime numbers up to n
+    
+    // Returns a set of the prime numbers up to n
+    std::set<int> primes_to_n_set(int n);
+
+    std::set<long int> primes_to_n_set(long int n);
+
+    std::set<long long int> primes_to_n_set(long long int n);
+
+    std::set<unsigned> primes_to_n_set(unsigned n);
+
+    std::set<long unsigned> primes_to_n_set(long unsigned n);
+
+    std::set<long long unsigned> primes_to_n_set(long long unsigned n);
+
+    // Returns a vector of the prime numbers up to n
+    // exists to support legacy code. New code should use the set versions
     
     std::vector<int> primes_to_n(int n);
 

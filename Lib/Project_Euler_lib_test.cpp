@@ -95,61 +95,6 @@ bool test_primes_to_n(){
     return passed_all_tests;
 }
 
-bool test_prime_counting_function(){
-    using project_euler::prime_counting_function;
-    bool all_tests_passed = true;
-    cout << "Running tests of prime_counting_function" << endl;
-    // Tests for composite integer
-    if(prime_counting_function((long long) 50) == 15){
-        cout << "prime_counting_function(50) successfully returned 15" <<endl;
-    }
-    else {
-        all_tests_passed &= false;
-        cout << "prime_counting_function(50) returned " << prime_counting_function(50) << " rather than 15"<< endl;
-    }
-    if(prime_counting_function((long long) 1000000) == 78498){
-        cout << "prime_counting_function(1000000) successfully returned 78498" <<endl;
-    }
-    else {
-        all_tests_passed &= false;
-        cout << "prime_counting_function(1000000) returned " << prime_counting_function(1000000) << " rather than 78498"<< endl;
-    }
-    // Tests for prime integer
-    if(prime_counting_function(1000003) == 6){
-        cout << "prime_counting_function(1000003) successfully returned 78499" <<endl;
-    }
-    else {
-        all_tests_passed &= false;
-        cout << "prime_counting_function(1000003) returned " << prime_counting_function(1000003) << " rather than 78499" << endl;
-    }
-    // Test for 1
-    if(prime_counting_function(1) == 0){
-        cout << "prime_counting_function(1) successfully returned 0" <<endl;
-    }
-    else {
-        all_tests_passed &= false;
-        cout << "prime_counting_function(1) returned " << prime_counting_function(1) << endl;
-    }
-    // Test for 0
-    if(prime_counting_function(0) == 0){
-        cout << "prime_counting_function(0) successfully returned 0" <<endl;
-    }
-    else {
-        all_tests_passed &= false;
-        cout << "prime_counting_function(0) returned " << prime_counting_function(0) << endl;
-    }
-    // Test for negative number
-    if(prime_counting_function(-5) == 0){
-        cout << "prime_counting_function(-5) successfully returned 0" <<endl;
-    }
-    else {
-        all_tests_passed &= false;
-        cout << "prime_counting_function(-5) returned " << prime_counting_function(-5) << endl;
-    }
-    cout << endl;
-    return all_tests_passed;
-}
-
 //bool test_prime_factors(){
 //    using project_euler::prime_factors;
 //
@@ -682,8 +627,6 @@ int main(){
     bool all_tests_passed = true;
     
     all_tests_passed &= test_primes_to_n();    
-
-    //all_tests_passed &= test_prime_counting_function();
 
     all_tests_passed &= test_isqrt();
 

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <array>
 #include <utility>
@@ -18,6 +19,7 @@
 #include "Project_Euler.h"
 
 using std::vector;  using std::array;
+using std::set;
 using std::pair;    using std::unordered_map;
 
 using project_euler::primes_to_100;
@@ -26,25 +28,22 @@ namespace project_euler_internal {
 
     // Calculates a vector of all prime numbers <= n
     template <typename T>
-    vector<T> primes_to_n_template(const T n, vector<T>&& primes){
-        if(primes.back() >= n){
-            auto p = primes.begin();
-            while (p != primes.end() && *p <= n){
-                ++p;
-            }
-            return vector<T>{primes.begin(), p};
-        }
+    set<T> primes_to_n_template(const T n, set<T>&& primes){
         if ( n < 2){
-            return vector<T>();
+            return set<T>();
         }
-
-        primes.reserve(n/std::log(n));
+        {
+            auto p = primes.lower_bound(n);
+            if(p != primes.end()){
+                return set<T>{primes.begin(), ++p};
+            }
+        }
 
         if(primes.empty()){
-            primes.push_back(2);
+            primes.emplace_hint(primes.end(),2);
         }
 
-        T offset = primes.back()+1;
+        T offset = *(--primes.end()) + 1;
 
         vector<bool> is_prime(n+1-offset,true);
 
@@ -54,13 +53,12 @@ namespace project_euler_internal {
                 is_prime[j-offset] = false;
             }
         }
-        std::cerr << std::endl;
 
         // Performs main sieve
         T i;
         for(i = offset + ((offset+1) % 2); i*i <= n; i += 2){
             if( is_prime[i-offset] ){
-                primes.push_back(i);
+                primes.emplace_hint(primes.end(),i);
                 for(T j = 2*i; j < n; j += i){
                     is_prime[j-offset] = false;
                 }
@@ -70,112 +68,17 @@ namespace project_euler_internal {
         // Once sieving is complete, adds primes > sqrt(n) to list of primes
         for(;i <= n; i += 2){
             if( is_prime[i-offset] ){
-                primes.push_back(i);
+                primes.emplace_hint(primes.end(),i);
             }
         }
 
-        primes.shrink_to_fit();
         return primes;
     }
 
     template<typename T>
-    vector<T> primes_to_n_template(const T n,const vector<T>& primes){
-        return primes_to_n_template(n, vector<T>{primes});
+    set<T> primes_to_n_template(const T n,const set<T>& primes){
+        return primes_to_n_template(n, set<T>{primes});
     }
-
-
-    template<typename IntType>
-    class prime_counting_function_template{
-    public:
-        prime_counting_function_template(): prime_list_val(),prime_list(prime_list_val), pi_cache(),phi_cache(){}
-
-        IntType operator()(IntType x, const vector<IntType>& primes){
-            prime_list = &primes;
-            return pi_function(x);
-        }
-
-        IntType operator()(IntType x){
-            IntType primes_to_calculate = x > 10000 ? std::sqrt(x) + 1 : 100;
-            prime_list_val = primes_to_n_template(primes_to_calculate, primes_to_100<IntType>());
-            prime_list = prime_list_val;
-            return pi_function(x);
-        }
-
-    private:
-        // A list of prime numbers for use in the computation
-        // may be stored internally or use an external reference
-        vector<IntType> prime_list_val;
-        vector<IntType>& prime_list;
-
-        // Many caches
-        unordered_map<IntType,IntType> pi_cache;
-        unordered_map<pair<IntType,IntType>,IntType,boost::hash<pair<IntType,IntType>>> phi_cache;
-
-
-        // computes the prime counting funciton, given a list of primes
-        IntType pi_function(IntType n){
-            if(n <= prime_list.back()){
-                if ( n == prime_list.back()){
-                    return prime_list.size();
-                }
-                IntType i = 0;
-                while ( prime_list[i] <= n){
-                    ++i;
-                }
-                return i;
-            }
-            try {
-                return pi_cache.at(n);
-            }
-            catch (const std::out_of_range& e) {
-                IntType a = pi_function((IntType) std::sqrt(n));//std::cbrt(n));
-                pi_cache[n] = phi(n,a) + a - 1;// - p2(n,m);
-                return pi_cache[n];
-            }
-        }
-
-        // Meissel-Lehmer phi function. Counts the number of natural numbers less
-        // than x with no prime factors less than p_a, that is the a th prime
-        // number
-        IntType phi(IntType x, IntType a){
-            if (x <= a){
-                return 0;
-            }
-            if (a == 1){
-                return (x/2) + (x % 2); // number of odd nunbers less than x
-            }
-            else if( a > 1 ){
-                try{
-                    return phi_cache.at(pair<IntType,IntType>{x,a});
-                } catch (const std::out_of_range& e){
-                    return phi(x,a-1) - phi(x/prime_list[a-1], a-1);
-                }
-            }
-            else{
-                if(x >= 0){
-                    return x;
-                }
-                else throw std::domain_error("cannot take Meissel-Lehmer phi function of a negative number");
-            }
-        }
-
-        // Meissel-Lehmer p2 function. Counts the number of natural numbers
-        // less than m with exactly 2 prime factors, both of which are greater
-        // than n.
-        IntType p2(IntType m, IntType n){
-            if(prime_list[n] >= m){
-                return 0;
-            }
-            IntType upper_lim = pi_function((IntType) std::sqrt(m));
-            //std::cerr << "upper lim = " << upper_lim << std::endl;
-            IntType tot = 0;
-            for(IntType i = n+1; i <= upper_lim; ++i){
-                //std::cerr << "args = (" << m << "," << n << ") upper_lim = " << upper_lim << "\ti = " << i << std::endl;
-                tot += pi_function((IntType) (m/prime_list[i]));
-            }
-            return tot - ((upper_lim - n)*(upper_lim + n -1))/2;
-        }
-    };
 
 //    template<typename T>
 //    vector<pair<T,T>> prime_factors_template(T n, const vector<T>& primes){
@@ -333,48 +236,60 @@ namespace project_euler_internal {
 // Functions that take advantage of the templates are written,
 // ensuring that only typesafe versions are avalible in the header
 
-vector<int> project_euler::primes_to_n(const int n){
+set<int> project_euler::primes_to_n_set(const int n){
     return project_euler_internal::primes_to_n_template(n, primes_to_100<int>());
 }
 
-vector<long int> project_euler::primes_to_n(const long int n){
+set<long int> project_euler::primes_to_n_set(const long int n){
     return project_euler_internal::primes_to_n_template(n, primes_to_100<long int>());
 }
 
-vector<long long int> project_euler::primes_to_n(const long long int n){
+set<long long int> project_euler::primes_to_n_set(const long long int n){
     return project_euler_internal::primes_to_n_template(n, primes_to_100<long long int>());
 }
 
-vector<unsigned> project_euler::primes_to_n(const unsigned n){
+set<unsigned> project_euler::primes_to_n_set(const unsigned n){
     return project_euler_internal::primes_to_n_template(n, primes_to_100<unsigned>());
 }
 
-vector<long unsigned> project_euler::primes_to_n(const long unsigned n){
+set<long unsigned> project_euler::primes_to_n_set(const long unsigned n){
     return project_euler_internal::primes_to_n_template(n, primes_to_100<long unsigned>());
 }
 
-vector<long long unsigned> project_euler::primes_to_n(
+set<long long unsigned> project_euler::primes_to_n_set(
                                                 const long long unsigned n){
     return project_euler_internal::primes_to_n_template(n, primes_to_100<long long unsigned>());
 }
 
-int project_euler::prime_counting_function(int n){
-    return project_euler_internal::prime_counting_function_template<int>()(n);
+vector<int> project_euler::primes_to_n(const int n){
+    auto p =  project_euler_internal::primes_to_n_template(n, primes_to_100<int>());
+    return vector<int>(p.begin(), p.end());
 }
-long project_euler::prime_counting_function(long n){
-    return project_euler_internal::prime_counting_function_template<long>()(n);
+
+vector<long int> project_euler::primes_to_n(const long int n){
+    auto p = project_euler_internal::primes_to_n_template(n, primes_to_100<long int>());
+    return vector<long int>(p.begin(), p.end());
 }
-long long project_euler::prime_counting_function(long long n){
-    return project_euler_internal::prime_counting_function_template<long long>()(n);
+
+vector<long long int> project_euler::primes_to_n(const long long int n){
+    auto p = project_euler_internal::primes_to_n_template(n, primes_to_100<long long int>());
+    return vector<long long int>(p.begin(), p.end());
 }
-unsigned project_euler::prime_counting_function(unsigned n){
-    return project_euler_internal::prime_counting_function_template<unsigned>()(n);
+
+vector<unsigned> project_euler::primes_to_n(const unsigned n){
+    auto p = project_euler_internal::primes_to_n_template(n, primes_to_100<unsigned>());
+    return vector<unsigned>(p.begin(), p.end());
 }
-long unsigned project_euler::prime_counting_function(long unsigned n){
-    return project_euler_internal::prime_counting_function_template<long unsigned>()(n);
+
+vector<long unsigned> project_euler::primes_to_n(const long unsigned n){
+    auto p = project_euler_internal::primes_to_n_template(n, primes_to_100<long unsigned>());
+    return vector<long unsigned>(p.begin(), p.end());
 }
-long long unsigned project_euler::prime_counting_function(long long unsigned n){
-    return project_euler_internal::prime_counting_function_template<long long unsigned>()(n);
+
+vector<long long unsigned> project_euler::primes_to_n(
+                                                const long long unsigned n){
+    auto p = project_euler_internal::primes_to_n_template(n, primes_to_100<long long unsigned>());
+    return vector<long long unsigned>(p.begin(), p.end());
 }
 
 //vector<pair<int,int>> project_euler::prime_factors(int n,const  vector<int>& primes){
