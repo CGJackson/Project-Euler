@@ -25,6 +25,10 @@ impl<T,const N:usize> Graph<T,N> {
         return &self.nodes[idx].children;
     }
 
+    fn get_node(&self, idx:usize) -> &Node<T,N>{
+        return &self.nodes[idx];
+    }
+
 }
 
 pub fn build_graph<I1,I2,T, const E:usize>(vals : I1, edges: I2 )-> Graph<T,E> 
@@ -140,4 +144,75 @@ where
 
 
     }
+}
+
+pub fn delta_stepping<T,const N:usize>(graph : &Graph<T,N>,source :usize, delta : T) -> (Vec<Option<T>>,Vec<Option<Vec<usize>>>) 
+    where
+        T: std::ops::Add<Output=T> + std::cmp::Ord + Clone + std::fmt::Debug + std::ops::Div<Output = T> + std::convert::TryInto<usize>
+    {
+    use std::collections::BTreeSet;
+    use std::collections::BTreeMap;
+
+    let mut tentative_distances:Vec<Option<T>> = vec![None;graph.n_nodes()];
+    tentative_distances[source] = Some(graph.get_val(source).clone());
+    let mut tentative_paths:Vec<Option<Vec<usize>>> = vec![None;graph.n_nodes()];
+    tentative_paths[source] = Some(vec![source]);
+    let mut buckets : BTreeMap<T,BTreeSet<usize>> = BTreeMap::new();
+    buckets.insert(graph.get_val(source).clone()/delta.clone(),{let mut first_bucket = BTreeSet::new();
+                                                    first_bucket.insert(source);
+                                                    first_bucket});
+
+    let mut relax = |start_node: usize,end_node :usize, bckts :&mut BTreeMap<T,BTreeSet<usize>>| {
+        let proposed_distance = tentative_distances[start_node].clone().unwrap() + graph.get_val(end_node).clone();
+        if tentative_distances[end_node].is_none() || *tentative_distances[end_node].as_ref().unwrap() > proposed_distance {
+            match &tentative_distances[end_node] {
+                Some(d) => bckts.get_mut(&(d.clone()/delta.clone())).unwrap().remove(&end_node),
+                None => false,
+            };
+            tentative_distances[end_node] = Some(proposed_distance.clone());
+            tentative_paths[end_node] = tentative_paths[start_node].clone();
+            tentative_paths.get_mut(end_node).unwrap().as_mut().unwrap().push(end_node);
+            bckts.entry(proposed_distance/delta.clone()).or_insert(BTreeSet::new()).insert(end_node);
+        }
+    };
+
+    while !buckets.is_empty() {
+        let (next_bucket_index,mut next_bucket) = buckets.pop_first().unwrap();
+        let mut to_relax_heavy:BTreeSet<usize>= BTreeSet::new();
+        while !next_bucket.is_empty() {
+            let next_node_index = match next_bucket.pop_first(){
+                Some(idx) => idx,
+                None => break,
+            };
+            let next_node_children = graph.get_children(next_node_index);
+            for child in next_node_children {
+                let g = match child {
+                    Some(v) => *v,
+                    None => continue,
+                };
+                if *graph.get_val(g) > delta{
+                    continue;
+                }
+                relax(next_node_index, g,&mut buckets)
+            }
+            to_relax_heavy.insert(next_node_index);
+        }
+        for next_node_index in to_relax_heavy {
+            let next_node_children = graph.get_children(next_node_index);
+            for child in next_node_children {
+                let g = match child {
+                    Some(v) => *v,
+                    None => continue,
+                };
+                if *graph.get_val(g) <= delta{
+                    continue;
+                }
+                relax(next_node_index, g,&mut buckets)
+            }
+        }
+
+
+    }
+    return (tentative_distances,tentative_paths);
+    
 }
