@@ -146,73 +146,127 @@ where
     }
 }
 
-pub fn delta_stepping<T,const N:usize>(graph : &Graph<T,N>,source :usize, delta : T) -> (Vec<Option<T>>,Vec<Option<Vec<usize>>>) 
+pub fn delta_stepping<T,const N:usize>(graph : &Graph<T,N>,source :usize, delta : T,max_threads : u32) -> (Vec<Option<T>>,Vec<Option<Vec<usize>>>) 
     where
-        T: std::ops::Add<Output=T> + std::cmp::Ord + Clone + std::fmt::Debug + std::ops::Div<Output = T> + std::convert::TryInto<usize>
+        T: std::ops::Add<Output=T> + std::cmp::Ord + Clone + std::fmt::Debug + std::ops::Div<Output = T> + std::convert::TryInto<usize> + std::marker::Send + std::marker::Sync
     {
     use std::collections::BTreeSet;
     use std::collections::BTreeMap;
+    use std::thread;
+    use std::sync::Mutex;
 
-    let mut tentative_distances:Vec<Option<T>> = vec![None;graph.n_nodes()];
-    tentative_distances[source] = Some(graph.get_val(source).clone());
-    let mut tentative_paths:Vec<Option<Vec<usize>>> = vec![None;graph.n_nodes()];
-    tentative_paths[source] = Some(vec![source]);
-    let mut buckets : BTreeMap<T,BTreeSet<usize>> = BTreeMap::new();
-    buckets.insert(graph.get_val(source).clone()/delta.clone(),{let mut first_bucket = BTreeSet::new();
-                                                    first_bucket.insert(source);
-                                                    first_bucket});
+    let tentative_distances_mutex:Mutex<Vec<Option<T>>> = Mutex::new(vec![None;graph.n_nodes()]);
+    {
+        let tentative_distances = &mut tentative_distances_mutex.lock().unwrap();
+        tentative_distances[source] = Some(graph.get_val(source).clone());
+    }
+    let tentative_paths_mutex:Mutex<Vec<Option<Vec<usize>>>> = Mutex::new(vec![None;graph.n_nodes()]);
+    {
+        let tentative_paths = &mut tentative_paths_mutex.lock().unwrap();
+        tentative_paths[source] = Some(vec![source]);
+    }
+    let buckets_mutex : Mutex<BTreeMap<T,BTreeSet<usize>>> = Mutex::new(BTreeMap::new());
+    {
+        let buckets = &mut buckets_mutex.lock().unwrap();
+        buckets.insert(graph.get_val(source).clone()/delta.clone(),{let mut first_bucket = BTreeSet::new();
+                                                        first_bucket.insert(source);
+                                                        first_bucket});
+    }
 
-    let mut relax = |start_node: usize,end_node :usize, bckts :&mut BTreeMap<T,BTreeSet<usize>>| {
+    let relax = |start_node: usize,end_node :usize, bckts_mutex :&Mutex<BTreeMap<T,BTreeSet<usize>>>| {
+        let mut tentative_distances = tentative_distances_mutex.lock().unwrap();
         let proposed_distance = tentative_distances[start_node].clone().unwrap() + graph.get_val(end_node).clone();
         if tentative_distances[end_node].is_none() || *tentative_distances[end_node].as_ref().unwrap() > proposed_distance {
-            match &tentative_distances[end_node] {
-                Some(d) => bckts.get_mut(&(d.clone()/delta.clone())).unwrap().remove(&end_node),
-                None => false,
-            };
-            tentative_distances[end_node] = Some(proposed_distance.clone());
-            tentative_paths[end_node] = tentative_paths[start_node].clone();
-            tentative_paths.get_mut(end_node).unwrap().as_mut().unwrap().push(end_node);
-            bckts.entry(proposed_distance/delta.clone()).or_insert(BTreeSet::new()).insert(end_node);
+            {
+                let mut bckts = bckts_mutex.lock().unwrap();
+                match &tentative_distances[end_node] {
+                    Some(d) => {
+                                bckts.get_mut(&(d.clone()/delta.clone())).unwrap().remove(&end_node)
+                                },
+                    None => false,
+                };
+                bckts.entry(proposed_distance.clone()/delta.clone()).or_insert(BTreeSet::new()).insert(end_node);
+            }
+            tentative_distances[end_node] = Some(proposed_distance);
+            drop(tentative_distances);
+            {
+                let tentative_paths = &mut tentative_paths_mutex.lock().unwrap();
+                tentative_paths[end_node] = tentative_paths[start_node].clone();
+                tentative_paths.get_mut(end_node).unwrap().as_mut().unwrap().push(end_node);
+            }
         }
     };
 
-    while !buckets.is_empty() {
-        let (next_bucket_index,mut next_bucket) = buckets.pop_first().unwrap();
-        let mut to_relax_heavy:BTreeSet<usize>= BTreeSet::new();
-        while !next_bucket.is_empty() {
-            let next_node_index = match next_bucket.pop_first(){
-                Some(idx) => idx,
-                None => break,
-            };
-            let next_node_children = graph.get_children(next_node_index);
-            for child in next_node_children {
-                let g = match child {
-                    Some(v) => *v,
-                    None => continue,
-                };
-                if *graph.get_val(g) > delta{
-                    continue;
-                }
-                relax(next_node_index, g,&mut buckets)
+    let mut redundant_buckets_lock = Some(buckets_mutex.lock().unwrap());
+    while !(*redundant_buckets_lock.as_ref().unwrap()).is_empty() {
+
+        let (next_bucket_index,next_bucket) = redundant_buckets_lock.unwrap().pop_first().unwrap();
+        redundant_buckets_lock = None;
+        let next_bucket_mutex = Mutex::new(next_bucket);
+        let to_relax_heavy_mutex:Mutex<BTreeSet<usize>>= Mutex::new(BTreeSet::new());
+
+        thread::scope(|s|{
+            for _i in 0..max_threads{
+                s.spawn(||{
+                    let mut next_bucket = Some(next_bucket_mutex.lock().unwrap());
+                    while !(*next_bucket.as_ref().unwrap()).is_empty() {
+                        let next_node_index = match (*next_bucket.unwrap()).pop_first(){
+                            Some(idx) => idx,
+                            None => break,
+                        };
+                        next_bucket = None; // releases lock
+                        let next_node_children = graph.get_children(next_node_index);
+                        for child in next_node_children {
+                            let g = match child {
+                                Some(v) => *v,
+                                None => continue,
+                            };
+                            if *graph.get_val(g) > delta{
+                                continue;
+                            }
+                            relax(next_node_index, g,&buckets_mutex)
+                        }
+                        {
+                            let mut to_relax_heavy = to_relax_heavy_mutex.lock().unwrap();
+                            to_relax_heavy.insert(next_node_index);
+                        }
+                        next_bucket = Some(next_bucket_mutex.lock().unwrap()) // reaquire lock
+                    }
+                });
             }
-            to_relax_heavy.insert(next_node_index);
-        }
-        for next_node_index in to_relax_heavy {
-            let next_node_children = graph.get_children(next_node_index);
-            for child in next_node_children {
-                let g = match child {
-                    Some(v) => *v,
-                    None => continue,
-                };
-                if *graph.get_val(g) <= delta{
-                    continue;
-                }
-                relax(next_node_index, g,&mut buckets)
-            }
-        }
+        });
 
 
+        thread::scope(|s|{
+            for _i in 0..max_threads{
+                s.spawn(||{
+                    let mut to_relax_heavy = Some(to_relax_heavy_mutex.lock().unwrap());
+                    while !(*to_relax_heavy.as_ref().unwrap()).is_empty() {
+                        let next_node_index = (*to_relax_heavy.unwrap()).pop_first().unwrap();
+                        to_relax_heavy = None;
+
+                        let next_node_children = graph.get_children(next_node_index);
+                        for child in next_node_children {
+                            let g = match child {
+                                Some(v) => *v,
+                                None => continue,
+                            };
+                            if *graph.get_val(g) <= delta{
+                                continue;
+                            }
+                            relax(next_node_index, g,&buckets_mutex)
+                        }
+                        to_relax_heavy = Some(to_relax_heavy_mutex.lock().unwrap());
+                    }
+                });
+            }
+        });
+
+
+        redundant_buckets_lock = Some(buckets_mutex.lock().unwrap());
     }
-    return (tentative_distances,tentative_paths);
+
+    
+    return (tentative_distances_mutex.lock().unwrap().to_vec(),tentative_paths_mutex.lock().unwrap().to_vec());
     
 }
