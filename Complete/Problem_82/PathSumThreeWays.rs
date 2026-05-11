@@ -56,7 +56,7 @@ fn main(){
     const DELTA: i32 = 200;
 
     for source in &left_hand_edge{
-        let (source_distances,_) = path_finding::delta_stepping(&matrix,*source,DELTA);
+        let (source_distances,_) = path_finding::delta_stepping(&matrix,*source,DELTA,1);
 
         for destination in &right_hand_edge{
             let distance_to_destination = match source_distances[*destination] {
